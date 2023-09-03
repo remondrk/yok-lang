@@ -5,8 +5,6 @@
 
 #include "instr.hpp"
 
-typedef std::variant<std::string, float> Field;
-
 class Runtime {
 public:
     Runtime(std::vector<Instr> &p_instr);

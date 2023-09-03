@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 #include <string>
-#include <variant>
+
+#include "field.hpp"
 
 enum class InstrType {
     SIGN,
@@ -32,15 +33,11 @@ enum class ArgType {
     VAL
 };
 
-typedef std::variant<std::string, float> ArgValue;
-
 struct Argument {
-    ArgValue value;
+    Field value;
     ArgType type;
 
-    Argument(ArgValue p_value, ArgType p_type);
-    std::string str_val() const;
-    float float_val() const;
+    Argument(Field p_value, ArgType p_type);
 };
 
 struct Instr {

@@ -4,13 +4,16 @@
 
 class Field {
 public:
+    Field();
     Field(std::variant<std::string, float> p_data);
 
-    bool is_string();
-    bool is_float();
+    void set_data(std::variant<std::string, float> p_data);
+
+    bool is_string() const;
+    bool is_float() const;
     
-    std::string get_string();
-    float get_float();
+    std::string get_string() const;
+    float get_float() const;
 private:
     std::variant<std::string, float> m_data;
 };

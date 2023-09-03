@@ -5,6 +5,7 @@
 #include "token.hpp"
 #include "instr.hpp"
 #include "parser.hpp"
+#include "field.hpp"
 #include "error.hpp"
 
 #define NO_TOKEN {}
@@ -209,27 +210,31 @@ void Parser::try_parse_instr(const std::vector<Match> &p_pattern, InstrType type
             continue;
 
         if (match.type == MatchType::ID && tok.type == TokenType::WORD) {
-            instr.args.push_back(Argument(tok.value, ArgType::ID));
+            instr.args.push_back(Argument(Field(tok.value), ArgType::ID));
             continue;
         }
 
         if (match.type == MatchType::VALUE) {
             if (tok.type == TokenType::WORD) {
-                instr.args.push_back(Argument(tok.value, ArgType::ID));
+                instr.args.push_back(Argument(Field(tok.value), ArgType::ID));
                 continue;
             }
 
             if (tok.type != TokenType::LIT_NUM && tok.type != TokenType::LIT_STR)
                 return;
-            ArgValue val = tok.type == TokenType::LIT_NUM ? std::stof(tok.value) : (ArgValue)tok.value;
-            instr.args.push_back(Argument(val, ArgType::VAL));
+
+            Argument arg(Field(tok.value), ArgType::VAL);
+            if (tok.type == TokenType::LIT_NUM)
+                arg.value = Field(std::stof(tok.value));
+
+            instr.args.push_back(arg);
             continue;
         }
 
         if (match.type == MatchType::QUANTITY && tok.type == TokenType::LIT_NUM) {
             if (std::stof(tok.value) != 1)
                 must_end_with_s = true;
-            instr.args.push_back(Argument(std::stof(tok.value), ArgType::VAL));
+            instr.args.push_back(Argument(Field(std::stof(tok.value)), ArgType::VAL));
             continue;
         }
 

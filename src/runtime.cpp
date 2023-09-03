@@ -7,6 +7,7 @@
 
 #include "instr.hpp"
 #include "runtime.hpp"
+#include "field.hpp"
 #include "error.hpp"
 
 #define ERR_MSG_NO_SIGN "can't find the sign to hop to"
@@ -31,9 +32,9 @@ Runtime::Runtime(std::vector<Instr> &p_instrs)
 Field Runtime::eval_arg(const Argument &p_arg) {
     Field value = p_arg.value;
     if (p_arg.type == ArgType::ID) {
-        if (m_vars.find(p_arg.str_val()) == m_vars.end())
+        if (m_vars.find(p_arg.value.get_string()) == m_vars.end())
             panic(ERR_MSG_VAR_NOT_DEF);
-        value = m_vars[p_arg.str_val()];
+        value = m_vars[p_arg.value.get_string()];
     }
     return value;
 }
@@ -76,7 +77,7 @@ void Runtime::run() {
 // void Runtime::run_sign() {}
 
 void Runtime::run_hop() {
-    const std::string &target_text = m_curr_instr->args[0].str_val();
+    const std::string &target_text = m_curr_instr->args[0].value.get_string();
     size_t above_cursor = m_instr_cursor;
     size_t below_cursor = m_instr_cursor;
 
@@ -92,7 +93,7 @@ void Runtime::run_hop() {
 
         if (is_above_safe) {
             const bool is_sign = m_instrs[above_cursor].type == InstrType::SIGN;
-            const bool is_match = is_sign && m_instrs[above_cursor].args[0].str_val() == target_text;
+            const bool is_match = is_sign && m_instrs[above_cursor].args[0].value.get_string() == target_text;
             if (is_match) {
                 m_instr_cursor = above_cursor;
                 return;
@@ -101,7 +102,7 @@ void Runtime::run_hop() {
 
         if (is_below_safe) {
             const bool is_sign = m_instrs[below_cursor].type == InstrType::SIGN;
-            const bool is_match = is_sign && m_instrs[below_cursor].args[0].str_val() == target_text;
+            const bool is_match = is_sign && m_instrs[below_cursor].args[0].value.get_string() == target_text;
             if (is_match) {
                 m_instr_cursor = below_cursor;
                 return;
@@ -116,10 +117,10 @@ void Runtime::run_hop() {
 // Note: above and below are according to the source .yok
 // file, meaning above will check previous instructions
 void Runtime::run_hop_above() {
-    const std::string &target_text = m_curr_instr->args[0].str_val();
+    const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor; cursor > 0; cursor--) {
         const bool is_sign = m_instrs[cursor].type == InstrType::SIGN;
-        const bool is_match = is_sign && m_instrs[cursor].args[0].str_val() == target_text;
+        const bool is_match = is_sign && m_instrs[cursor].args[0].value.get_string() == target_text;
         if (is_match) {
             m_instr_cursor = cursor;
             return;
@@ -130,10 +131,10 @@ void Runtime::run_hop_above() {
 }
 
 void Runtime::run_hop_below() {
-    const std::string &target_text = m_curr_instr->args[0].str_val();
+    const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor + 1; cursor < m_instrs.size(); cursor++) {
         const bool is_sign = m_instrs[cursor].type == InstrType::SIGN;
-        const bool is_match = is_sign && m_instrs[cursor].args[0].str_val() == target_text;
+        const bool is_match = is_sign && m_instrs[cursor].args[0].value.get_string() == target_text;
         if (is_match) {
             m_instr_cursor = cursor;
             return;
@@ -158,36 +159,34 @@ void Runtime::run_return() {
 void Runtime::run_input() {
     std::string input;
     std::cin >> input;
-    m_vars["the-inputted-string"] = input;
+    m_vars["the-inputted-string"].set_data(input);
 
     try {
-        m_vars["the-inputted-number"] = std::stof(input);
+        m_vars["the-inputted-number"].set_data(std::stof(input));
     }
     catch(const std::exception& e) {
-        m_vars["the-inputted-number"] = 0.0f;
+        m_vars["the-inputted-number"].set_data(0.0f);
     }
 }
 
 void Runtime::run_output() {
     const Field value = eval_arg(m_curr_instr->args[0]);
-
-    if (std::holds_alternative<float>(value))
-        std::cout << std::get<float>(value) << "\n";
+    if (value.is_float())
+        std::cout << value.get_float() << "\n";
     else
-        std::cout << std::get<std::string>(value) << "\n";
+        std::cout << value.get_string() << "\n";
 }
 
 void Runtime::run_output_no_newl() {
     const Field value = eval_arg(m_curr_instr->args[0]);
-
-    if (std::holds_alternative<float>(value))
-        std::cout << std::get<float>(value);
+    if (value.is_float())
+        std::cout << value.get_float();
     else
-        std::cout << std::get<std::string>(value);
+        std::cout << value.get_string();
 }
 
 void Runtime::run_create_var() {
-    const std::string name = m_curr_instr->args[0].str_val();
+    const std::string name = m_curr_instr->args[0].value.get_string();
     if (m_vars.find(name) != m_vars.end())
         panic(ERR_MSG_VAR_ALREADY_DEF);
     
@@ -196,7 +195,7 @@ void Runtime::run_create_var() {
 
 void Runtime::run_assign_var() {
     const Field value = eval_arg(m_curr_instr->args[0]);
-    const std::string name = m_curr_instr->args[1].str_val();
+    const std::string name = m_curr_instr->args[1].value.get_string();
 
     if (m_vars.find(name) == m_vars.end())
         panic(ERR_MSG_VAR_NOT_DEF);
@@ -208,23 +207,23 @@ void Runtime::run_if_skip() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);
     const Field field2 = eval_arg(m_curr_instr->args[2]);
 
-    const float n1 = std::holds_alternative<float>(field1) ? std::get<float>(field1) : 0;
-    const float n2 = std::holds_alternative<float>(field2) ? std::get<float>(field2) : 0;
+    const float n1 = field1.get_float();
+    const float n2 = field2.get_float();
 
-    const std::string &cmp = m_curr_instr->args[1].str_val();
+    const std::string &cmp = m_curr_instr->args[1].value.get_string();
 
     // instead of checking if cmp is not equal to every
     // possible comparison type to verify it is valid
-    if (cmp == CMP_IS)        { if (field1 != field2) return; }
-    else if (cmp == CMP_ISNT) { if (field1 == field2) return; }
+    if (cmp == CMP_IS)        { if (field1.get_string() != field2.get_string()) return; }
+    else if (cmp == CMP_ISNT) { if (field1.get_string() == field2.get_string()) return; }
     else if (cmp == CMP_GT)   { if (n1     <= n2    ) return; }
     else if (cmp == CMP_LT)   { if (n1     >= n2    ) return; }
     else if (cmp == CMP_GTE)  { if (n1      < n2    ) return; }
     else if (cmp == CMP_LTE)  { if (n1      > n2    ) return; }
     else                      { panic(ERR_MSG_INVALID_CMP);   }
 
-    const size_t ln_count = m_curr_instr->args[3].float_val();
-    if (ln_count != m_curr_instr->args[3].float_val())
+    const size_t ln_count = m_curr_instr->args[3].value.get_float();
+    if (ln_count != m_curr_instr->args[3].value.get_float())
         panic(ERR_MSG_CANT_SKIP_NON_INT);
 
     for (size_t cursor = m_instr_cursor; cursor < m_instrs.size(); cursor++) {
@@ -239,39 +238,41 @@ void Runtime::run_divide() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);
     const Field field2 = eval_arg(m_curr_instr->args[1]);
 
-    if (std::holds_alternative<float>(field1) && std::holds_alternative<float>(field2)) {
-        const float result = std::get<float>(field1) / std::get<float>(field2);
-        m_vars["the-resulting-number"] = result;
-        m_vars["the-resulting-string"] = std::to_string(result);
+    if (field1.is_float() && field2.is_float()) {
+        const float result = field1.get_float() / field2.get_float();
+        m_vars["the-resulting-number"].set_data(result);
+        m_vars["the-resulting-string"].set_data(std::to_string(result));
         return;
     }
 
-    if (std::holds_alternative<std::string>(field1) && std::holds_alternative<float>(field2)) {
-        m_vars["the-resulting-number"] = 0.0f;
-        m_vars["the-resulting-string"] = std::get<std::string>(field1).substr(0, std::get<float>(field2));
+    if (field1.is_string() && field2.is_float()) {
+        m_vars["the-resulting-number"].set_data(0.0f);
+        m_vars["the-resulting-string"].set_data(field1.get_string().substr(0, field2.get_float()));
         return;
     }
 
     panic(ERR_MSG_INVALID_COMB_OF_ARG_TYPES);
 }
 
+// TODO: random ass but dont forget to reput const keyword in i think instr or parser or sth
+
 void Runtime::run_multiply() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);
     const Field field2 = eval_arg(m_curr_instr->args[1]);
 
-    if (std::holds_alternative<float>(field1) && std::holds_alternative<float>(field2)) {
-        const float result = std::get<float>(field1) * std::get<float>(field2);
-        m_vars["the-resulting-number"] = result;
-        m_vars["the-resulting-string"] = std::to_string(result);
+    if (field1.is_float() && field2.is_float()) {
+        const float result = field1.get_float() * field2.get_float();
+        m_vars["the-resulting-number"].set_data(result);
+        m_vars["the-resulting-string"].set_data(std::to_string(result));
         return;
     }
 
-    if (std::holds_alternative<std::string>(field1) && std::holds_alternative<float>(field2)) {
+    if (field1.is_string() && field2.is_float()) {
         std::string result = "";
-        for (size_t i = 0; i < std::get<float>(field2); i++)
-            result += std::get<std::string>(field1);
-        m_vars["the-resulting-number"] = 0.0f;
-        m_vars["the-resulting-string"] = result;
+        for (size_t i = 0; i < field2.get_float(); i++)
+            result += field1.get_string();
+        m_vars["the-resulting-number"].set_data(0.0f);
+        m_vars["the-resulting-string"].set_data(result);
         return;
     }
 
@@ -282,10 +283,10 @@ void Runtime::run_add() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);
     const Field field2 = eval_arg(m_curr_instr->args[1]);
 
-    if (std::holds_alternative<float>(field1) && std::holds_alternative<float>(field2)) {
-        const float result = std::get<float>(field1) + std::get<float>(field2);
-        m_vars["the-resulting-number"] = result;
-        m_vars["the-resulting-string"] = std::to_string(result);
+    if (field1.is_float() && field2.is_float()) {
+        const float result = field1.get_float() + field2.get_float();
+        m_vars["the-resulting-number"].set_data(result);
+        m_vars["the-resulting-string"].set_data(std::to_string(result));
         return;
     }
 
@@ -297,10 +298,10 @@ void Runtime::run_subtract() {
     const Field field1 = eval_arg(m_curr_instr->args[1]);
     const Field field2 = eval_arg(m_curr_instr->args[0]);
 
-    if (std::holds_alternative<float>(field1) && std::holds_alternative<float>(field2)) {
-        const float result = std::get<float>(field1) - std::get<float>(field2);
-        m_vars["the-resulting-number"] = result;
-        m_vars["the-resulting-string"] = std::to_string(result);
+    if (field1.is_float() && field2.is_float()) {
+        const float result = field1.get_float() - field2.get_float();
+        m_vars["the-resulting-number"].set_data(result);
+        m_vars["the-resulting-string"].set_data(std::to_string(result));
         return;
     }
 
@@ -311,9 +312,9 @@ void Runtime::run_concat() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);
     const Field field2 = eval_arg(m_curr_instr->args[1]);
 
-    if (std::holds_alternative<std::string>(field1) && std::holds_alternative<std::string>(field2)) {
-        m_vars["the-resulting-number"] = 0.0f;
-        m_vars["the-resulting-string"] = std::get<std::string>(field1) + std::get<std::string>(field2);
+    if (field1.is_string() && field2.is_string()) {
+        m_vars["the-resulting-number"].set_data(0.0f);
+        m_vars["the-resulting-string"].set_data(field1.get_string() + field2.get_string());
         return;
     }
 
