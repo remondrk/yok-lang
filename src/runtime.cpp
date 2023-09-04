@@ -237,7 +237,7 @@ void Runtime::run_unless_skip() {
     const size_t ln_count = m_curr_instr->args[3].value.get_float();
     if (ln_count != m_curr_instr->args[3].value.get_float())
         panic(ERR_MSG_CANT_SKIP_NON_INT);
-    
+
     skip_n_lines(ln_count);
 }
 
