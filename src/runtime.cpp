@@ -52,7 +52,7 @@ void Runtime::run() {
         m_curr_instr = &m_instrs[m_instr_cursor];
 
         switch (m_curr_instr->type) {
-            case InstrType::SIGN: /* run_sign(); */ break;
+            case InstrType::WAYPOINT: /* run_sign(); */ break;
             case InstrType::TP: run_tp(); break;
             case InstrType::TP_ABOVE: run_tp_above(); break;
             case InstrType::TP_BELOW: run_tp_below(); break;
@@ -91,7 +91,7 @@ void Runtime::run_tp() {
         below_cursor++;
 
         if (is_above_safe) {
-            const bool is_sign = m_instrs[above_cursor].type == InstrType::SIGN;
+            const bool is_sign = m_instrs[above_cursor].type == InstrType::WAYPOINT;
             const bool is_match = is_sign && m_instrs[above_cursor].args[0].value.get_string() == target_text;
             if (is_match) {
                 m_instr_cursor = above_cursor;
@@ -100,7 +100,7 @@ void Runtime::run_tp() {
         }
 
         if (is_below_safe) {
-            const bool is_sign = m_instrs[below_cursor].type == InstrType::SIGN;
+            const bool is_sign = m_instrs[below_cursor].type == InstrType::WAYPOINT;
             const bool is_match = is_sign && m_instrs[below_cursor].args[0].value.get_string() == target_text;
             if (is_match) {
                 m_instr_cursor = below_cursor;
@@ -118,7 +118,7 @@ void Runtime::run_tp() {
 void Runtime::run_tp_above() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor; cursor > 0; cursor--) {
-        const bool is_sign = m_instrs[cursor].type == InstrType::SIGN;
+        const bool is_sign = m_instrs[cursor].type == InstrType::WAYPOINT;
         const bool is_match = is_sign && m_instrs[cursor].args[0].value.get_string() == target_text;
         if (is_match) {
             m_instr_cursor = cursor;
@@ -132,7 +132,7 @@ void Runtime::run_tp_above() {
 void Runtime::run_tp_below() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor + 1; cursor < m_instrs.size(); cursor++) {
-        const bool is_sign = m_instrs[cursor].type == InstrType::SIGN;
+        const bool is_sign = m_instrs[cursor].type == InstrType::WAYPOINT;
         const bool is_match = is_sign && m_instrs[cursor].args[0].value.get_string() == target_text;
         if (is_match) {
             m_instr_cursor = cursor;

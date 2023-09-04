@@ -24,7 +24,7 @@ std::vector<Instr> Parser::get_instrs() {
             M("here"),
             M("labelled"),
             M(MatchType::ID),
-        }, InstrType::SIGN);
+        }, InstrType::WAYPOINT);
 
         try_parse_instr({
             M("teleport"),

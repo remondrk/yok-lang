@@ -5,7 +5,7 @@
 #include "field.hpp"
 
 enum class InstrType {
-    SIGN,
+    WAYPOINT,
     TP,
     TP_BUT_RETURN,
     TP_BELOW,
