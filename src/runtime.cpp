@@ -218,7 +218,7 @@ bool Runtime::compare_fields(const Field &p_field1, const Field &p_field2, const
 }
 
 void Runtime::skip_n_lines(size_t p_n) {
-    for (size_t cursor = m_instr_cursor; cursor < m_instrs.size(); cursor++) {
+    for (size_t cursor = m_instr_cursor; cursor <= m_instrs.size(); cursor++) {
         if (m_instrs[cursor].line_no > m_curr_instr->line_no + p_n) {
             m_instr_cursor = cursor - 1;
             return;
@@ -237,6 +237,7 @@ void Runtime::run_unless_skip() {
     const size_t ln_count = m_curr_instr->args[3].value.get_float();
     if (ln_count != m_curr_instr->args[3].value.get_float())
         panic(ERR_MSG_CANT_SKIP_NON_INT);
+    
     skip_n_lines(ln_count);
 }
 
