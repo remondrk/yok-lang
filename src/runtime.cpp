@@ -56,7 +56,7 @@ void Runtime::run() {
             case InstrType::TP: run_tp(); break;
             case InstrType::TP_ABOVE: run_tp_above(); break;
             case InstrType::TP_BELOW: run_tp_below(); break;
-            case InstrType::TP_BUT_RETUN: run_tp_but_ret(); break;
+            case InstrType::TP_BUT_RETURN: run_tp_but_ret(); break;
             case InstrType::RETURN: run_return(); break;
             case InstrType::CREATE_VAR: run_create_var(); break;
             case InstrType::ASSIGN_VAR: run_assign_var(); break;

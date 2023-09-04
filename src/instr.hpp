@@ -7,7 +7,7 @@
 enum class InstrType {
     SIGN,
     TP,
-    TP_BUT_RETUN,
+    TP_BUT_RETURN,
     TP_BELOW,
     TP_ABOVE,
     RETURN,

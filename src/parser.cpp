@@ -68,7 +68,7 @@ std::vector<Instr> Parser::get_instrs() {
             M("when"),
             M("you're"),
             M("done"),
-        }, InstrType::TP_BUT_RETUN);
+        }, InstrType::TP_BUT_RETURN);
 
         try_parse_instr({
             M("teleport"),
