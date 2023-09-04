@@ -23,19 +23,22 @@ private:
 
     Field eval_arg(const Argument &p_arg);
 
+    bool compare_fields(const Field &p_field1, const Field &p_field2, const std::string &p_cmp);
+    void skip_n_lines(size_t p_n);
+
     void panic(const std::string &p_msg);
     void run_not_implemented();
-    // void run_sign();
-    void run_hop();
-    void run_hop_above();
-    void run_hop_below();
-    void run_hop_but_ret();
+    void run_tp();
+    void run_tp_above();
+    void run_tp_below();
+    void run_tp_but_ret();
     void run_return();
     void run_create_var();
     void run_assign_var();
     void run_input();
-    void run_output();
-    void run_output_no_newl();
+    void run_say();
+    void run_whisper();
+    void run_unless_skip();
     void run_if_skip();
     void run_divide();
     void run_multiply();

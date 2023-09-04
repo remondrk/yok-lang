@@ -6,19 +6,20 @@
 
 enum class InstrType {
     SIGN,
-    HOP,
-    HOP_BUT_RETUN,
-    HOP_BELOW,
-    HOP_ABOVE,
+    TP,
+    TP_BUT_RETUN,
+    TP_BELOW,
+    TP_ABOVE,
     RETURN,
 
     CREATE_VAR,
     ASSIGN_VAR,
 
     INPUT,
-    OUTPUT,
-    OUTPUT_NO_NEWL,
+    SAY,
+    WHISPER,
 
+    UNLESS_SKIP,
     IF_SKIP,
 
     DIVIDE,

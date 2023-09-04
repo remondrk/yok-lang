@@ -18,69 +18,64 @@ std::vector<Instr> Parser::get_instrs() {
         const size_t prev_instrs_len = m_instrs.size();
 
         try_parse_instr({
-            M("put"),
+            M("set"),
             M("a"),
-            M("sign"),
+            M("waypoint"),
             M("here"),
-            M("that"),
-            M("reads"),
+            M("labelled"),
             M(MatchType::ID),
         }, InstrType::SIGN);
 
         try_parse_instr({
-            M("hop"),
+            M("teleport"),
             M("to"),
             M("the"),
-            M("sign"),
-            M("that"),
-            M("reads"),
+            M("waypoint"),
+            M("labelled"),
             M(MatchType::ID),
-        }, InstrType::HOP);
+        }, InstrType::TP);
 
         try_parse_instr({
-            M("hop"),
+            M("teleport"),
             M("to"),
             M("the"),
-            M("sign"),
+            M("waypoint"),
             M("below"),
-            M("that"),
-            M("reads"),
+            M("labelled"),
             M(MatchType::ID),
-        }, InstrType::HOP_BELOW);
+        }, InstrType::TP_BELOW);
 
         try_parse_instr({
-            M("hop"),
+            M("teleport"),
             M("to"),
             M("the"),
-            M("sign"),
+            M("waypoint"),
             M("above"),
-            M("that"),
-            M("reads"),
+            M("labelled"),
             M(MatchType::ID),
-        }, InstrType::HOP_ABOVE);
+        }, InstrType::TP_ABOVE);
 
         try_parse_instr({
-            M("hop"),
+            M("teleport"),
             M("to"),
             M("the"),
-            M("sign"),
-            M("that"),
-            M("reads"),
+            M("waypoint"),
+            M("labelled"),
             M(MatchType::ID),
             M("but"),
-            M("return"),
+            M("teleport"),
             M("back"),
             M("when"),
             M("you're"),
             M("done"),
-        }, InstrType::HOP_BUT_RETUN);
+        }, InstrType::TP_BUT_RETUN);
 
         try_parse_instr({
-            M("return"),
+            M("teleport"),
             M("back"),
             M("to"),
             M("the"),
-            M("last"),
+            M("previous"),
             M("place"),
             M("we"),
             M("said"),
@@ -91,9 +86,7 @@ std::vector<Instr> Parser::get_instrs() {
             M("create"),
             M("a"),
             M("variable"),
-            M("and"),
-            M("call"),
-            M("it"),
+            M("named"),
             M(MatchType::ID),
         }, InstrType::CREATE_VAR);
 
@@ -116,13 +109,24 @@ std::vector<Instr> Parser::get_instrs() {
             M(MatchType::VALUE),
             M("out"),
             M("loud"),
-        }, InstrType::OUTPUT);
+        }, InstrType::SAY);
 
         try_parse_instr({
             M("whisper"),
             M(MatchType::VALUE),
             M("silently"),
-        }, InstrType::OUTPUT_NO_NEWL);
+        }, InstrType::WHISPER);
+
+        try_parse_instr({
+            M("unless"),
+            M(MatchType::VALUE),
+            M(MatchType::ID),
+            M(MatchType::VALUE),
+            M("skip"),
+            M("next"),
+            M(MatchType::QUANTITY),
+            M("line"),
+        }, InstrType::UNLESS_SKIP);
 
         try_parse_instr({
             M("if"),

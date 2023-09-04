@@ -10,7 +10,7 @@
 #include "field.hpp"
 #include "error.hpp"
 
-#define ERR_MSG_NO_WAYPOINT "can't find the sign to hop to"
+#define ERR_MSG_NO_WAYPOINT "can't find the waypoint to teleport to"
 #define ERR_MSG_VAR_NOT_DEF "variable is not defined"
 #define ERR_MSG_VAR_ALREADY_DEF "variable is already defined"
 #define ERR_MSG_NOWHERE_TO_RET "no previous return points"
@@ -53,16 +53,17 @@ void Runtime::run() {
 
         switch (m_curr_instr->type) {
             case InstrType::SIGN: /* run_sign(); */ break;
-            case InstrType::HOP: run_hop(); break;
-            case InstrType::HOP_ABOVE: run_hop_above(); break;
-            case InstrType::HOP_BELOW: run_hop_below(); break;
-            case InstrType::HOP_BUT_RETUN: run_hop_but_ret(); break;
+            case InstrType::TP: run_tp(); break;
+            case InstrType::TP_ABOVE: run_tp_above(); break;
+            case InstrType::TP_BELOW: run_tp_below(); break;
+            case InstrType::TP_BUT_RETUN: run_tp_but_ret(); break;
             case InstrType::RETURN: run_return(); break;
             case InstrType::CREATE_VAR: run_create_var(); break;
             case InstrType::ASSIGN_VAR: run_assign_var(); break;
             case InstrType::INPUT: run_input(); break;
-            case InstrType::OUTPUT: run_output(); break;
-            case InstrType::OUTPUT_NO_NEWL: run_output_no_newl(); break;
+            case InstrType::SAY: run_say(); break;
+            case InstrType::WHISPER: run_whisper(); break;
+            case InstrType::UNLESS_SKIP: run_unless_skip(); break;
             case InstrType::IF_SKIP: run_if_skip(); break;
             case InstrType::DIVIDE: run_divide(); break;
             case InstrType::MULTIPLY: run_multiply(); break;
@@ -74,9 +75,7 @@ void Runtime::run() {
     }
 }
 
-// void Runtime::run_sign() {}
-
-void Runtime::run_hop() {
+void Runtime::run_tp() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     size_t above_cursor = m_instr_cursor;
     size_t below_cursor = m_instr_cursor;
@@ -116,7 +115,7 @@ void Runtime::run_hop() {
 // TODO: check above one
 // Note: above and below are according to the source .yok
 // file, meaning above will check previous instructions
-void Runtime::run_hop_above() {
+void Runtime::run_tp_above() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor; cursor > 0; cursor--) {
         const bool is_sign = m_instrs[cursor].type == InstrType::SIGN;
@@ -130,7 +129,7 @@ void Runtime::run_hop_above() {
     panic(ERR_MSG_NO_WAYPOINT);
 }
 
-void Runtime::run_hop_below() {
+void Runtime::run_tp_below() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor + 1; cursor < m_instrs.size(); cursor++) {
         const bool is_sign = m_instrs[cursor].type == InstrType::SIGN;
@@ -144,9 +143,9 @@ void Runtime::run_hop_below() {
     panic(ERR_MSG_NO_WAYPOINT);
 }
 
-void Runtime::run_hop_but_ret() {
+void Runtime::run_tp_but_ret() {
     m_return_stack.push_back(m_instr_cursor);
-    run_hop();
+    run_tp();
 }
 
 void Runtime::run_return() {
@@ -169,7 +168,7 @@ void Runtime::run_input() {
     }
 }
 
-void Runtime::run_output() {
+void Runtime::run_say() {
     const Field value = eval_arg(m_curr_instr->args[0]);
     if (value.is_float())
         std::cout << value.get_float() << "\n";
@@ -177,7 +176,7 @@ void Runtime::run_output() {
         std::cout << value.get_string() << "\n";
 }
 
-void Runtime::run_output_no_newl() {
+void Runtime::run_whisper() {
     const Field value = eval_arg(m_curr_instr->args[0]);
     if (value.is_float())
         std::cout << value.get_float();
@@ -203,35 +202,56 @@ void Runtime::run_assign_var() {
     m_vars[name] = value;
 }
 
-void Runtime::run_if_skip() {
-    const Field field1 = eval_arg(m_curr_instr->args[0]);
-    const Field field2 = eval_arg(m_curr_instr->args[2]);
+bool Runtime::compare_fields(const Field &p_field1, const Field &p_field2, const std::string &p_cmp) {
+    const float n1 = p_field1.get_float();
+    const float n2 = p_field2.get_float();
 
-    const float n1 = field1.get_float();
-    const float n2 = field2.get_float();
+    if (p_cmp == CMP_IS)        { if (p_field1.get_string() == p_field2.get_string()) return true; }
+    else if (p_cmp == CMP_ISNT) { if (p_field1.get_string() != p_field2.get_string()) return true; }
+    else if (p_cmp == CMP_GT)   { if (n1      > n2    ) return true; }
+    else if (p_cmp == CMP_LT)   { if (n1      < n2    ) return true; }
+    else if (p_cmp == CMP_GTE)  { if (n1     >= n2    ) return true; }
+    else if (p_cmp == CMP_LTE)  { if (n1     <= n2    ) return true; }
+    else                        { panic(ERR_MSG_INVALID_CMP);   }
 
-    const std::string &cmp = m_curr_instr->args[1].value.get_string();
+    return false;
+}
 
-    // instead of checking if cmp is not equal to every
-    // possible comparison type to verify it is valid
-    if (cmp == CMP_IS)        { if (field1.get_string() != field2.get_string()) return; }
-    else if (cmp == CMP_ISNT) { if (field1.get_string() == field2.get_string()) return; }
-    else if (cmp == CMP_GT)   { if (n1     <= n2    ) return; }
-    else if (cmp == CMP_LT)   { if (n1     >= n2    ) return; }
-    else if (cmp == CMP_GTE)  { if (n1      < n2    ) return; }
-    else if (cmp == CMP_LTE)  { if (n1      > n2    ) return; }
-    else                      { panic(ERR_MSG_INVALID_CMP);   }
-
-    const size_t ln_count = m_curr_instr->args[3].value.get_float();
-    if (ln_count != m_curr_instr->args[3].value.get_float())
-        panic(ERR_MSG_CANT_SKIP_NON_INT);
-
+void Runtime::skip_n_lines(size_t p_n) {
     for (size_t cursor = m_instr_cursor; cursor < m_instrs.size(); cursor++) {
-        if (m_instrs[cursor].line_no > m_curr_instr->line_no + ln_count) {
+        if (m_instrs[cursor].line_no > m_curr_instr->line_no + p_n) {
             m_instr_cursor = cursor - 1;
             return;
         }
     }
+}
+
+void Runtime::run_unless_skip() {
+    const Field field1 = eval_arg(m_curr_instr->args[0]);
+    const Field field2 = eval_arg(m_curr_instr->args[2]);
+    const std::string &cmp = m_curr_instr->args[1].value.get_string();
+
+    if (compare_fields(field1, field2, cmp))
+        return;
+
+    const size_t ln_count = m_curr_instr->args[3].value.get_float();
+    if (ln_count != m_curr_instr->args[3].value.get_float())
+        panic(ERR_MSG_CANT_SKIP_NON_INT);
+    skip_n_lines(ln_count);
+}
+
+void Runtime::run_if_skip() {
+    const Field field1 = eval_arg(m_curr_instr->args[0]);
+    const Field field2 = eval_arg(m_curr_instr->args[2]);
+    const std::string &cmp = m_curr_instr->args[1].value.get_string();
+
+    if (!compare_fields(field1, field2, cmp))
+        return;
+
+    const size_t ln_count = m_curr_instr->args[3].value.get_float();
+    if (ln_count != m_curr_instr->args[3].value.get_float())
+        panic(ERR_MSG_CANT_SKIP_NON_INT);
+    skip_n_lines(ln_count);
 }
 
 void Runtime::run_divide() {
