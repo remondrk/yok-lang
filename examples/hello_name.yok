@@ -1,0 +1,7 @@
+say "what is your name?" out loud
+wait for user input
+
+concatenate "Hello, " and the-inputted-string
+concatenate the-resulting-string and "!"
+
+say the-resulting-string out loud

@@ -1,0 +1,53 @@
+create a variable named op
+create a variable named n-one
+create a variable named n-two
+create a variable named op-str
+
+set a waypoint here labelled calculator-loop
+    say "--- CALCULATOR ------------------------------------------------------" out loud
+    whisper "select operation (divide/multiply/add/subtract/exit): " silently
+    wait for user input
+    assign the-inputted-string to op
+
+    unless op is "exit" skip next 1 line
+        teleport to the waypoint below labelled exit
+
+    whisper "first number: " silently
+    wait for user input
+    assign the-inputted-number to n-one
+
+    whisper "second number: " silently
+    wait for user input
+    assign the-inputted-number to n-two
+
+    assign "not-manipulated" to the-resulting-string
+
+    unless op is "divide" skip next 2 lines
+        divide n-one by n-two
+        assign " / " to op-str
+
+    unless op is "multiply" skip next 2 lines
+        multiply n-one by n-two
+        assign " * " to op-str
+
+    unless op is "add" skip next 2 lines
+        add n-one and n-two
+        assign " + " to op-str
+
+    unless op is "subtract" skip next 2 lines
+        subtract n-two from n-one
+        assign " - " to op-str
+
+    unless the-resulting-string is "not-manipulated" skip next 2 lines
+        say "invalid operator!" out loud
+        teleport to the waypoint above labelled calculator-loop
+
+    whisper n-one silently
+    whisper op-str silently
+    whisper n-two silently
+    whisper " = " silently
+    say the-resulting-number out loud
+    say "" out loud
+
+    teleport to the waypoint above labelled calculator-loop
+set a waypoint here labelled exit
