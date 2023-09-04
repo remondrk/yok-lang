@@ -10,7 +10,7 @@
 #include "field.hpp"
 #include "error.hpp"
 
-#define ERR_MSG_NO_SIGN "can't find the sign to hop to"
+#define ERR_MSG_NO_WAYPOINT "can't find the sign to hop to"
 #define ERR_MSG_VAR_NOT_DEF "variable is not defined"
 #define ERR_MSG_VAR_ALREADY_DEF "variable is already defined"
 #define ERR_MSG_NOWHERE_TO_RET "no previous return points"
@@ -110,7 +110,7 @@ void Runtime::run_hop() {
         }
     }
 
-    panic(ERR_MSG_NO_SIGN);
+    panic(ERR_MSG_NO_WAYPOINT);
 }
 
 // TODO: check above one
@@ -127,7 +127,7 @@ void Runtime::run_hop_above() {
         }
     }
 
-    panic(ERR_MSG_NO_SIGN);
+    panic(ERR_MSG_NO_WAYPOINT);
 }
 
 void Runtime::run_hop_below() {
@@ -141,7 +141,7 @@ void Runtime::run_hop_below() {
         }
     }
 
-    panic(ERR_MSG_NO_SIGN);
+    panic(ERR_MSG_NO_WAYPOINT);
 }
 
 void Runtime::run_hop_but_ret() {
@@ -253,8 +253,6 @@ void Runtime::run_divide() {
 
     panic(ERR_MSG_INVALID_COMB_OF_ARG_TYPES);
 }
-
-// TODO: random ass but dont forget to reput const keyword in i think instr or parser or sth
 
 void Runtime::run_multiply() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);

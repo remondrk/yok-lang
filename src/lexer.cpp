@@ -10,7 +10,6 @@
 
 #define CHAR_EOF 0
 #define CHAR_DEC_SEP ','
-#define ERR_MSG_UNDEF_TOK "undefined token"
 
 Lexer::Lexer(const std::string &p_src)
     : m_src(p_src) {};
@@ -31,7 +30,7 @@ std::vector<TokenLine> Lexer::get_tokenlines() {
         terminate_tokenline();
 
         if (prev_cursor == m_cursor)
-            throw std::invalid_argument(make_err_msg(m_curr_ln, m_curr_col, ERR_MSG_UNDEF_TOK));
+            throw std::invalid_argument(make_err_msg(m_curr_ln, m_curr_col, "undefined token"));
     };
 
     return m_tokenlines;

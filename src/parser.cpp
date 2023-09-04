@@ -8,10 +8,6 @@
 #include "field.hpp"
 #include "error.hpp"
 
-#define NO_TOKEN {}
-#define ERR_MSG_UNDEF_INSTR "unknown instruction"
-#define ERR_MSG_INCORRECT_PLURAL "plural suffix must be used correctly"
-
 Parser::Parser(std::vector<TokenLine> &p_tokenlines)
     : m_tokenlines(p_tokenlines) {}
 
@@ -178,7 +174,7 @@ std::vector<Instr> Parser::get_instrs() {
             throw std::invalid_argument(make_err_msg(
                 m_curr_tokenline->line_no,
                 m_curr_tokenline->tokens[0].col_no,
-                ERR_MSG_UNDEF_INSTR));
+                "undefined instruction"));
     }
 
     return m_instrs;
@@ -201,7 +197,7 @@ void Parser::try_parse_instr(const std::vector<Match> &p_pattern, InstrType type
                 throw(make_err_msg(
                     m_curr_tokenline->line_no,
                     tok.col_no,
-                    ERR_MSG_INCORRECT_PLURAL
+                    "plural suffix must be used correctly"
                 ));
             tok.value.pop_back();
         }
