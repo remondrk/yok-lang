@@ -8,6 +8,16 @@
 #include "field.hpp"
 #include "error.hpp"
 
+Match::Match(MatchType type, std::string value) {
+    this->type = type;
+    this->value = value;
+}
+
+Match::Match(std::string value) {
+    this->type = MatchType::KEYWORD;
+    this->value = value;
+}
+
 Parser::Parser(std::vector<TokenLine> &p_tokenlines)
     : m_tokenlines(p_tokenlines) {}
 

@@ -16,15 +16,8 @@ struct Match {
     MatchType type;
     std::string value;
 
-    Match(MatchType type, std::string value = "") {
-        this->type = type;
-        this->value = value;
-    }
-
-    Match(std::string value) {
-        this->type = MatchType::KEYWORD;
-        this->value = value;
-    }
+    Match(MatchType type, std::string value = "");
+    Match(std::string value);
 };
 
 class Parser {
