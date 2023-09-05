@@ -6,9 +6,11 @@ This implementation is a prototype for a similar and more flexible language rath
 
 ## Instructions
 - `float` is a decimal number, comma as decimal seperator: `42,1907`, `1923`
+- (`float` literals don't support negative numbers, but it can be achieved using subtraction.)
 - `string` is started and ended with `"`: `"this is a string"`
 - `value` is string, float or variable id: `6`, `"foo"`, `bar`
 - `id` starts with a letter but can include `-` and `'`: `str's-len`
+&nbsp;
 
 > Create a variable. Can't be executed twice even on the same line
 ```
