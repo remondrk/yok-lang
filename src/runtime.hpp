@@ -5,6 +5,11 @@
 
 #include "instr.hpp"
 
+#define INPUT_STR_VAR_NAME "the-ingressed-string"
+#define INPUT_NUM_VAR_NAME "the-ingressed-number"
+#define RESULT_STR_VAR_NAME "the-resulting-string"
+#define RESULT_NUM_VAR_NAME "the-resulting-number"
+
 class Runtime {
 public:
     Runtime(std::vector<Instr> &p_instr);
@@ -12,10 +17,10 @@ public:
 private:
     size_t m_instr_cursor = 0;
     std::map<std::string, Field> m_vars = {
-        {"the-inputted-string" , {}},
-        {"the-inputted-number" , {}},
-        {"the-resulting-string", {}},
-        {"the-resulting-number", {}},
+        {INPUT_STR_VAR_NAME , {}},
+        {INPUT_NUM_VAR_NAME , {}},
+        {RESULT_STR_VAR_NAME, {}},
+        {RESULT_NUM_VAR_NAME, {}},
     };
     std::vector<Instr> &m_instrs;
     std::vector<size_t> m_return_stack;
@@ -28,21 +33,20 @@ private:
 
     void panic(const std::string &p_msg);
     void run_not_implemented();
-    void run_tp();
-    void run_tp_above();
-    void run_tp_below();
-    void run_tp_but_ret();
+    void run_go();
+    void run_go_up();
+    void run_go_down();
+    void run_call();
     void run_return();
-    void run_create_var();
+    void run_declare_var();
     void run_assign_var();
     void run_input();
-    void run_say();
-    void run_whisper();
+    void run_write_ln();
+    void run_write();
     void run_unless_skip();
     void run_if_skip();
     void run_divide();
     void run_multiply();
     void run_add();
     void run_subtract();
-    void run_concat();
 };

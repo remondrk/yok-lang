@@ -8,135 +8,113 @@ This implementation is a prototype for a similar and more flexible language rath
 - `value` is string, float or variable id.
 - `id` starts with a letter but can include `-` and `'`.
 
-### Variables
-> Create an uninitialized variable. If a variable already exists it can't be created again, even if it is in the same line. Code must be structured accordingly.
+> Create a variable. Can't be executed twice even on the same line
 ```
-create a variable named {id}
+create a unique, uninitialized variable and name it {id}
 ```
-&nbsp;  
+&nbsp;
 
-> Assign a value to a variable.
+> Assign a value to a variable. Same variable can be assigned different types.
 ```
-assign {value} to {id}
+take the value of {value} and assign it to the variable {id}
 ```
-&nbsp;  
+&nbsp;
 
-### Control Flow
-> Label a point in code.
+> Label a point. Same `id` can be used multiple times.
 ```
-set a waypoint here labelled {id}
+this place will be referred to as {id} so that we can find it when we need to
 ```
-&nbsp;  
+&nbsp;
 
-> Go to the closest instance of a label in code. If there are two labels in equal distance going up and down, the one below is choosen.
+> Go to closest instance of a specified label. If there are two labels in equal distance go to the one below.
 ```
-teleport to the waypoint labelled {id}
+go upwards and downwards until you find a place that is referred to as {id}
 ```
-&nbsp;  
+&nbsp;
 
-> Push the current location to stack to return later and go to the closest instance of a label in code.
+> Similar to the one above, but this one can be used as a function call because it saves it's location to a stack to return later. 
 ```
-teleport to the waypoint labelled {id} but teleport back when you're done
+find a place that is referred to as {id}, however, return back here when you are told to do so
 ```
-&nbsp;  
+&nbsp;
 
-> Return to the previous location in the stack. Functions created using these instructions will be able to call other functions and return back to the correct location.
+> Return to the previous saved location and remove it from the stack.
 ```
-teleport back to the previous place we said we'll
+return back to the previous place that you promised to return back
 ```
-&nbsp;  
+&nbsp;
 
-> Go upwards to a label.
+> Go to the first instance of a specified label while going up.
 ```
-teleport to the waypoint above labelled {id}
+go upwards until you find the place that is referred to as {id}
 ```
-&nbsp;  
+&nbsp;
 
-> Go downwards to a label.
+> Go to the first instance of a specified label while going down.
 ```
-teleport to the waypoint below labelled {id}
+go downwards until you find the place that is referred to as {id}
 ```
-&nbsp;  
+&nbsp;
 
-> If the condition is met, skip a specified amount of lines. The instruction must end with `lines` instead of `line` if more than 1 is specified. Condition (called `id` here) must be one of the following.
-- `is`
-- `isn't`
-- `is-greater-than`
-- `is-less-than`
-- `is-greater-than-or-equal-to`
-- `is-less-than-or-equal-to`
+> If the condition is met, skip a specified amount of lines. Plural suffix in line/lines must be used correctly. Comparison operators are as follows:
+> - shares-the-same-value-with
+> - is-in-no-way-identical-to
+> - holds-a-greater-value-compared-to
+> - holds-a-lesser-value-compared-to
+> - shares-the-same-value-with-or-holds-a-greater-value-compared-to
+> - shares-the-same-value-with-or-holds-a-lesser-value-compared-to
 ```
-if {value} {id(condition)} {value} skip next {value} line/lines
+if it happens to be that {value} {comparison} {value} ignore the following {value} line/lines
 ```
-&nbsp;  
+&nbsp;
 
-> Unless the condition is met, skip a specified amount of lines. Rules are same as "if".
+> Unless the condition is met, skip a specified amount of lines. Same rules apply as 'if'.
 ```
-unless {value} {id(condition)} {value} skip next {value} line/lines
+unless it happens to be that {value} {id} {value} ignore the following {quantity} line/lines
 ```
-&nbsp;  
+&nbsp;
 
-### Input/Output
-> Wait for user input and save it to the variable `the-inputted-string`. If it can be converted to a float, convert it and save it to the variable `the-inputted-number`, otherwise just reset its value.
+> Read line and save it to `the-ingressed-string` variable. If it can be converted to float save it to `the-ingressed-float`, otherwise reset its value.
 ```
-wait for user input
+wait here until there is a useful ingress from the user
 ```
-&nbsp;  
+&nbsp;
 
-> Print a value and put a new line at the end.
+> Write line and put a new line at the end.
 ```
-say {value} out loud
+write {value} to the console and skip to the next line afterwards
 ```
-&nbsp;  
+&nbsp;
 
-> Print a value but don't put a new line.
+> Write line without a new line at the end.
 ```
-whisper {value} silently
+instruction
 ```
-&nbsp;  
+&nbsp;
 
-### Operations
-In all of the operations, `the-resulting-number` and `the-resulting-string` will be manipulated. If the result is a number both variables will be set after converting the value. If it is string, number variable will be reset.
+In the following instructions, if the result is a number it is saved to `the-resulting-number` and `the-resulting-string` variable after it's converted. If the result is a string it is saved to `the-resulting-string` variable and the value of `the-resulting-number` variable is reset.
+&nbsp;
 
-> If both values are numbers perform a division. If first value is a string get a substring starting from the first character of a size equal to second value, if not possible get the whole string back.
+> If both values are floats, perform a division. If only first value is string, get the first `y` characters. If only second value is string, remove the first `x` characters.
 ```
-divide {value} by {value}
+take the value of {value(x)} and divide it using the value of {value(y)}
 ```
-&nbsp;  
+&nbsp;
 
-> If both values are numbers perform a multiplication. If first value is a string, repeat it an amount of times equal to the second value.
+> If both values are floats, perform a multiplication. If only first value is string, repeat it `y` times.
 ```
-multiply {value} by {value}
+repeat the string or the number {value(x)} an amount of times equal to the number {value(y)}
 ```
-&nbsp;  
+&nbsp;
 
-> Add two numbers.
+> If both values are floats, perform an addition. If at least one of them is string, convert the non-string ones and concatenate them.
 ```
-add {value} and {value}
+take two numbers or strings , {value} and {value} , then merge their values together
 ```
-&nbsp;  
+&nbsp;
 
-> Subtract a number from another number.
+> If both values are numbers, perform a subtraction (x - y).
 ```
-subtract {value} from {value}
+perform a subtraction between {value(x)} and {value(y)} , the first one being the minuend
 ```
-&nbsp;  
-
-> Concatenate two strings.
-```
-concatenate {value} and {value}
-```
-&nbsp;  
-
-### Inline Instructions
-> Comment out until end of the line. Comma is optional.
-```
-{instructions}, btw {comment}
-```
-&nbsp;  
-
-> Write multiple instructions in one line.
-```
-{instruction 1} then {instruction 2} ...
-```
-&nbsp;  
+&nbsp;

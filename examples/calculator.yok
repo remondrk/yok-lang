@@ -1,53 +1,53 @@
-create a variable named op
-create a variable named n-one
-create a variable named n-two
-create a variable named op-str
+create a unique, uninitialized variable and name it op
+create a unique, uninitialized variable and name it n-one
+create a unique, uninitialized variable and name it n-two
+create a unique, uninitialized variable and name it op-str
 
-set a waypoint here labelled calculator-loop
-    say "--- CALCULATOR ------------------------------------------------------" out loud
-    whisper "select operation (divide/multiply/add/subtract/exit): " silently
-    wait for user input
-    assign the-inputted-string to op
+this place will be referred to as calculator-loop so that we can find it when we need to
+    write "" to the console and skip to the next line afterwards
+    write "--- CALCULATOR ------------------------------------------------------" to the console and skip to the next line afterwards
+    write "select operation (divide/multiply/add/subtract/exit): " to the console, but do not skip to the next line
+    wait here until there is a useful ingress from the user
+    take the value of the-ingressed-string and assign it to the variable op
 
-    unless op is "exit" skip next 1 line
-        teleport to the waypoint below labelled exit
+    unless it happens to be that op shares-the-same-value-with "exit" ignore the following 1 line
+        go downwards until you find the place that is referred to as exit
 
-    whisper "first number: " silently
-    wait for user input
-    assign the-inputted-number to n-one
+    write "first number: " to the console, but do not skip to the next line
+    wait here until there is a useful ingress from the user
+    take the value of the-ingressed-number and assign it to the variable n-one
 
-    whisper "second number: " silently
-    wait for user input
-    assign the-inputted-number to n-two
+    write "second number: " to the console, but do not skip to the next line
+    wait here until there is a useful ingress from the user
+    take the value of the-ingressed-number and assign it to the variable n-two
 
-    assign "not-manipulated" to the-resulting-string
+    take the value of "not-manipulated" and assign it to the variable the-resulting-string
 
-    unless op is "divide" skip next 2 lines
-        divide n-one by n-two
-        assign " / " to op-str
+    unless it happens to be that op shares-the-same-value-with "divide" ignore the following 2 lines
+        take the value of n-one and divide it using the value of n-two
+        take the value of " / " and assign it to the variable op-str
 
-    unless op is "multiply" skip next 2 lines
-        multiply n-one by n-two
-        assign " * " to op-str
+    unless it happens to be that op shares-the-same-value-with "multiply" ignore the following 2 lines
+        repeat the string or the number n-one an amount of times equal to the number n-two
+        take the value of " * " and assign it to the variable op-str
 
-    unless op is "add" skip next 2 lines
-        add n-one and n-two
-        assign " + " to op-str
+    unless it happens to be that op shares-the-same-value-with "add" ignore the following 2 lines
+        take two numbers or strings, n-one and n-two, then merge their values together
+        take the value of " + " and assign it to the variable op-str
 
-    unless op is "subtract" skip next 2 lines
-        subtract n-two from n-one
-        assign " - " to op-str
+    unless it happens to be that op shares-the-same-value-with "subtract" ignore the following 2 lines
+        perform a subtraction between n-one and n-two, the first one being the minuend
+        take the value of " - " and assign it to the variable op-str
 
-    unless the-resulting-string is "not-manipulated" skip next 2 lines
-        say "invalid operator!" out loud
-        teleport to the waypoint above labelled calculator-loop
+    unless it happens to be that the-resulting-string shares-the-same-value-with "not-manipulated" ignore the following 2 lines
+        write "invalid operator!" to the console and skip to the next line afterwards
+        go upwards until you find the place that is referred to as calculator-loop
 
-    whisper n-one silently
-    whisper op-str silently
-    whisper n-two silently
-    whisper " = " silently
-    say the-resulting-number out loud
-    say "" out loud
+    write n-one to the console, but do not skip to the next line
+    write op-str to the console, but do not skip to the next line
+    write n-two to the console, but do not skip to the next line
+    write " = " to the console, but do not skip to the next line
+    write the-resulting-number to the console and skip to the next line afterwards
 
-    teleport to the waypoint above labelled calculator-loop
-set a waypoint here labelled exit
+    go upwards until you find the place that is referred to as calculator-loop
+this place will be referred to as exit so that we can find it when we need to

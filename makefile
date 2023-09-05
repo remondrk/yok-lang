@@ -7,6 +7,8 @@ all: $(TARGET)
 
 $(TARGET): $(SRCS)
 	@mkdir -p bin
+	@mkdir -p src/generated
+	python ./scripts/generate-parser-patterns.py ./src/generated/parser_patterns.hpp 
 	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRCS)
 
 run:

@@ -8,6 +8,9 @@
 #include "token.hpp"
 #include "error.hpp"
 
+#define COMMENT_WORD "by-the-way"
+#define SEPERATOR_WORD "and-then"
+
 #define CHAR_EOF 0
 #define CHAR_DEC_SEP ','
 
@@ -88,7 +91,7 @@ void Lexer::skip_spaces() {
 }
 
 void Lexer::skip_inline_comments() {
-    if (cmp_last_tok_val("btw")) {
+    if (cmp_last_tok_val(COMMENT_WORD)) {
         m_curr_tokenline.tokens.pop_back();
         if (cmp_last_tok_val(","))
             m_curr_tokenline.tokens.pop_back();
@@ -98,7 +101,7 @@ void Lexer::skip_inline_comments() {
 }
 
 void Lexer::terminate_tokenline() {
-    if (cmp_last_tok_val("then")) {
+    if (cmp_last_tok_val(SEPERATOR_WORD)) {
         m_curr_tokenline.tokens.pop_back();
         push_tokenline();
     }

@@ -28,17 +28,17 @@ std::vector<Instr> Parser::get_instrs() {
         m_curr_tokenline = &m_tokenlines[i];
         const size_t prev_instrs_len = m_instrs.size();
 
-        try_parse_instr(PATTERN_LABEL, InstrType::WAYPOINT);
-        try_parse_instr(PATTERN_GO, InstrType::TP);
-        try_parse_instr(PATTERN_CALL, InstrType::TP_BUT_RETURN);
-        try_parse_instr(PATTERN_GO_DOWN, InstrType::TP_BELOW);
-        try_parse_instr(PATTERN_GO_UP, InstrType::TP_ABOVE);
+        try_parse_instr(PATTERN_LABEL, InstrType::LABEL);
+        try_parse_instr(PATTERN_GO, InstrType::GO);
+        try_parse_instr(PATTERN_CALL, InstrType::CALL);
+        try_parse_instr(PATTERN_GO_DOWN, InstrType::GO_DOWN);
+        try_parse_instr(PATTERN_GO_UP, InstrType::GO_UP);
         try_parse_instr(PATTERN_RET, InstrType::RETURN);
-        try_parse_instr(PATTERN_VAR_DECL, InstrType::CREATE_VAR);
-        try_parse_instr(PATTERN_VAR_ASSIGN, InstrType::ASSIGN_VAR);
+        try_parse_instr(PATTERN_VAR_DECL, InstrType::VAR_DECL);
+        try_parse_instr(PATTERN_VAR_ASSIGN, InstrType::VAR_ASSIGN);
         try_parse_instr(PATTERN_INPUT, InstrType::INPUT);
-        try_parse_instr(PATTERN_WRITE_LN, InstrType::SAY);
-        try_parse_instr(PATTERN_WRITE, InstrType::WHISPER);
+        try_parse_instr(PATTERN_WRITE_LN, InstrType::WRITE_LN);
+        try_parse_instr(PATTERN_WRITE, InstrType::WRITE);
         try_parse_instr(PATTERN_UNLESS_SKIP, InstrType::UNLESS_SKIP);
         try_parse_instr(PATTERN_IF_SKIP, InstrType::IF_SKIP);
         try_parse_instr(PATTERN_DIVIDE, InstrType::DIVIDE);
@@ -78,7 +78,7 @@ void Parser::try_parse_instr(const std::vector<Match> &p_pattern, InstrType type
             tok.value.pop_back();
         }
 
-        if (match.type == MatchType::KEYWORD && tok.type == TokenType::WORD && tok.value == match.value)
+        if (match.type == MatchType::KEYWORD && tok.type != TokenType::LIT_STR && tok.value == match.value)
             continue;
 
         if (match.type == MatchType::ID && tok.type == TokenType::WORD) {

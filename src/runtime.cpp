@@ -10,7 +10,7 @@
 #include "field.hpp"
 #include "error.hpp"
 
-#define ERR_MSG_NO_WAYPOINT "can't find the waypoint to teleport to"
+#define ERR_MSG_NO_LABEL "can't find the label to teleport to"
 #define ERR_MSG_VAR_NOT_DEF "variable is not defined"
 #define ERR_MSG_VAR_ALREADY_DEF "variable is already defined"
 #define ERR_MSG_NOWHERE_TO_RET "no previous return points"
@@ -18,13 +18,14 @@
 #define ERR_MSG_INVALID_CMP "invalid comparison type"
 #define ERR_MSG_CANT_SKIP_NON_INT "cannot skip non-integer amount of lines"
 #define ERR_MSG_INVALID_COMB_OF_ARG_TYPES "invalid combination of types"
+#define ERR_MSG_STR_NOT_LONG_ENOUGH "string is not long enough"
 
-#define CMP_IS "is"
-#define CMP_ISNT "isn't"
-#define CMP_GT "is-greater-than"
-#define CMP_LT "is-less-than"
-#define CMP_GTE "is-greater-than-or-equal-to"
-#define CMP_LTE "is-less-than-or-equal-to"
+#define CMP_IS "shares-the-same-value-with"
+#define CMP_ISNT "is-in-no-way-identical-to"
+#define CMP_GT "holds-a-greater-value-compared-to"
+#define CMP_LT "holds-a-lesser-value-compared-to"
+#define CMP_GTE "shares-the-same-value-with-or-holds-a-greater-value-compared-to"
+#define CMP_LTE "shares-the-same-value-with-or-holds-a-lesser-value-compared-to"
 
 Runtime::Runtime(std::vector<Instr> &p_instrs)
     : m_instrs(p_instrs) {}
@@ -52,30 +53,29 @@ void Runtime::run() {
         m_curr_instr = &m_instrs[m_instr_cursor];
 
         switch (m_curr_instr->type) {
-            case InstrType::WAYPOINT: /* run_sign(); */ break;
-            case InstrType::TP: run_tp(); break;
-            case InstrType::TP_ABOVE: run_tp_above(); break;
-            case InstrType::TP_BELOW: run_tp_below(); break;
-            case InstrType::TP_BUT_RETURN: run_tp_but_ret(); break;
+            case InstrType::LABEL: /* run_sign(); */ break;
+            case InstrType::GO: run_go(); break;
+            case InstrType::GO_UP: run_go_up(); break;
+            case InstrType::GO_DOWN: run_go_down(); break;
+            case InstrType::CALL: run_call(); break;
             case InstrType::RETURN: run_return(); break;
-            case InstrType::CREATE_VAR: run_create_var(); break;
-            case InstrType::ASSIGN_VAR: run_assign_var(); break;
+            case InstrType::VAR_DECL: run_declare_var(); break;
+            case InstrType::VAR_ASSIGN: run_assign_var(); break;
             case InstrType::INPUT: run_input(); break;
-            case InstrType::SAY: run_say(); break;
-            case InstrType::WHISPER: run_whisper(); break;
+            case InstrType::WRITE_LN: run_write_ln(); break;
+            case InstrType::WRITE: run_write(); break;
             case InstrType::UNLESS_SKIP: run_unless_skip(); break;
             case InstrType::IF_SKIP: run_if_skip(); break;
             case InstrType::DIVIDE: run_divide(); break;
             case InstrType::MULTIPLY: run_multiply(); break;
             case InstrType::ADD: run_add(); break;
             case InstrType::SUBTRACT: run_subtract(); break;
-            case InstrType::CONCAT: run_concat(); break;
             default: run_not_implemented();
         }
     }
 }
 
-void Runtime::run_tp() {
+void Runtime::run_go() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     size_t above_cursor = m_instr_cursor;
     size_t below_cursor = m_instr_cursor;
@@ -91,7 +91,7 @@ void Runtime::run_tp() {
         below_cursor++;
 
         if (is_above_safe) {
-            const bool is_sign = m_instrs[above_cursor].type == InstrType::WAYPOINT;
+            const bool is_sign = m_instrs[above_cursor].type == InstrType::LABEL;
             const bool is_match = is_sign && m_instrs[above_cursor].args[0].value.get_string() == target_text;
             if (is_match) {
                 m_instr_cursor = above_cursor;
@@ -100,7 +100,7 @@ void Runtime::run_tp() {
         }
 
         if (is_below_safe) {
-            const bool is_sign = m_instrs[below_cursor].type == InstrType::WAYPOINT;
+            const bool is_sign = m_instrs[below_cursor].type == InstrType::LABEL;
             const bool is_match = is_sign && m_instrs[below_cursor].args[0].value.get_string() == target_text;
             if (is_match) {
                 m_instr_cursor = below_cursor;
@@ -109,16 +109,16 @@ void Runtime::run_tp() {
         }
     }
 
-    panic(ERR_MSG_NO_WAYPOINT);
+    panic(ERR_MSG_NO_LABEL);
 }
 
 // TODO: check above one
 // Note: above and below are according to the source .yok
 // file, meaning above will check previous instructions
-void Runtime::run_tp_above() {
+void Runtime::run_go_up() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor; cursor > 0; cursor--) {
-        const bool is_sign = m_instrs[cursor].type == InstrType::WAYPOINT;
+        const bool is_sign = m_instrs[cursor].type == InstrType::LABEL;
         const bool is_match = is_sign && m_instrs[cursor].args[0].value.get_string() == target_text;
         if (is_match) {
             m_instr_cursor = cursor;
@@ -126,13 +126,13 @@ void Runtime::run_tp_above() {
         }
     }
 
-    panic(ERR_MSG_NO_WAYPOINT);
+    panic(ERR_MSG_NO_LABEL);
 }
 
-void Runtime::run_tp_below() {
+void Runtime::run_go_down() {
     const std::string &target_text = m_curr_instr->args[0].value.get_string();
     for (size_t cursor = m_instr_cursor + 1; cursor < m_instrs.size(); cursor++) {
-        const bool is_sign = m_instrs[cursor].type == InstrType::WAYPOINT;
+        const bool is_sign = m_instrs[cursor].type == InstrType::LABEL;
         const bool is_match = is_sign && m_instrs[cursor].args[0].value.get_string() == target_text;
         if (is_match) {
             m_instr_cursor = cursor;
@@ -140,12 +140,12 @@ void Runtime::run_tp_below() {
         }
     }
 
-    panic(ERR_MSG_NO_WAYPOINT);
+    panic(ERR_MSG_NO_LABEL);
 }
 
-void Runtime::run_tp_but_ret() {
+void Runtime::run_call() {
     m_return_stack.push_back(m_instr_cursor);
-    run_tp();
+    run_go();
 }
 
 void Runtime::run_return() {
@@ -157,18 +157,18 @@ void Runtime::run_return() {
 
 void Runtime::run_input() {
     std::string input;
-    std::cin >> input;
-    m_vars["the-inputted-string"].set_data(input);
+    std::getline(std::cin, input);
+    m_vars[INPUT_STR_VAR_NAME].set_data(input);
 
     try {
-        m_vars["the-inputted-number"].set_data(std::stof(input));
+        m_vars[INPUT_NUM_VAR_NAME].set_data(std::stof(input));
     }
     catch(const std::exception& e) {
-        m_vars["the-inputted-number"].set_data(0.0f);
+        m_vars[INPUT_NUM_VAR_NAME].set_data(0.0f);
     }
 }
 
-void Runtime::run_say() {
+void Runtime::run_write_ln() {
     const Field value = eval_arg(m_curr_instr->args[0]);
     if (value.is_float())
         std::cout << value.get_float() << "\n";
@@ -176,7 +176,7 @@ void Runtime::run_say() {
         std::cout << value.get_string() << "\n";
 }
 
-void Runtime::run_whisper() {
+void Runtime::run_write() {
     const Field value = eval_arg(m_curr_instr->args[0]);
     if (value.is_float())
         std::cout << value.get_float();
@@ -184,7 +184,7 @@ void Runtime::run_whisper() {
         std::cout << value.get_string();
 }
 
-void Runtime::run_create_var() {
+void Runtime::run_declare_var() {
     const std::string name = m_curr_instr->args[0].value.get_string();
     if (m_vars.find(name) != m_vars.end())
         panic(ERR_MSG_VAR_ALREADY_DEF);
@@ -212,7 +212,7 @@ bool Runtime::compare_fields(const Field &p_field1, const Field &p_field2, const
     else if (p_cmp == CMP_LT)   { if (n1      < n2    ) return true; }
     else if (p_cmp == CMP_GTE)  { if (n1     >= n2    ) return true; }
     else if (p_cmp == CMP_LTE)  { if (n1     <= n2    ) return true; }
-    else                        { panic(ERR_MSG_INVALID_CMP);   }
+    else                        { panic(ERR_MSG_INVALID_CMP); }
 
     return false;
 }
@@ -261,14 +261,24 @@ void Runtime::run_divide() {
 
     if (field1.is_float() && field2.is_float()) {
         const float result = field1.get_float() / field2.get_float();
-        m_vars["the-resulting-number"].set_data(result);
-        m_vars["the-resulting-string"].set_data(std::to_string(result));
+        m_vars[RESULT_NUM_VAR_NAME].set_data(result);
+        m_vars[RESULT_STR_VAR_NAME].set_data(std::to_string(result));
         return;
     }
 
     if (field1.is_string() && field2.is_float()) {
-        m_vars["the-resulting-number"].set_data(0.0f);
-        m_vars["the-resulting-string"].set_data(field1.get_string().substr(0, field2.get_float()));
+        m_vars[RESULT_NUM_VAR_NAME].set_data(0.0f);
+        m_vars[RESULT_STR_VAR_NAME].set_data(field1.get_string().substr(0, field2.get_float()));
+        return;
+    }
+
+    if (field1.is_float() && field2.is_string()) {
+        const size_t start_pos = field1.get_float();
+        if (start_pos >= field2.get_string().size())
+            panic(ERR_MSG_STR_NOT_LONG_ENOUGH);
+
+        m_vars[RESULT_NUM_VAR_NAME].set_data(0.0f);
+        m_vars[RESULT_STR_VAR_NAME].set_data(field2.get_string().substr(start_pos));
         return;
     }
 
@@ -281,8 +291,8 @@ void Runtime::run_multiply() {
 
     if (field1.is_float() && field2.is_float()) {
         const float result = field1.get_float() * field2.get_float();
-        m_vars["the-resulting-number"].set_data(result);
-        m_vars["the-resulting-string"].set_data(std::to_string(result));
+        m_vars[RESULT_NUM_VAR_NAME].set_data(result);
+        m_vars[RESULT_STR_VAR_NAME].set_data(std::to_string(result));
         return;
     }
 
@@ -290,8 +300,8 @@ void Runtime::run_multiply() {
         std::string result = "";
         for (size_t i = 0; i < field2.get_float(); i++)
             result += field1.get_string();
-        m_vars["the-resulting-number"].set_data(0.0f);
-        m_vars["the-resulting-string"].set_data(result);
+        m_vars[RESULT_NUM_VAR_NAME].set_data(0.0f);
+        m_vars[RESULT_STR_VAR_NAME].set_data(result);
         return;
     }
 
@@ -304,36 +314,23 @@ void Runtime::run_add() {
 
     if (field1.is_float() && field2.is_float()) {
         const float result = field1.get_float() + field2.get_float();
-        m_vars["the-resulting-number"].set_data(result);
-        m_vars["the-resulting-string"].set_data(std::to_string(result));
+        m_vars[RESULT_NUM_VAR_NAME].set_data(result);
+        m_vars[RESULT_STR_VAR_NAME].set_data(std::to_string(result));
         return;
     }
 
-    panic(ERR_MSG_INVALID_COMB_OF_ARG_TYPES);
+    m_vars[RESULT_NUM_VAR_NAME].set_data(0.0f);
+    m_vars[RESULT_STR_VAR_NAME].set_data(field1.get_string() + field2.get_string());
 }
 
 void Runtime::run_subtract() {
-    // reversed because it is "subtract arg0 from arg1"
-    const Field field1 = eval_arg(m_curr_instr->args[1]);
-    const Field field2 = eval_arg(m_curr_instr->args[0]);
-
-    if (field1.is_float() && field2.is_float()) {
-        const float result = field1.get_float() - field2.get_float();
-        m_vars["the-resulting-number"].set_data(result);
-        m_vars["the-resulting-string"].set_data(std::to_string(result));
-        return;
-    }
-
-    panic(ERR_MSG_INVALID_COMB_OF_ARG_TYPES);
-}
-
-void Runtime::run_concat() {
     const Field field1 = eval_arg(m_curr_instr->args[0]);
     const Field field2 = eval_arg(m_curr_instr->args[1]);
 
-    if (field1.is_string() && field2.is_string()) {
-        m_vars["the-resulting-number"].set_data(0.0f);
-        m_vars["the-resulting-string"].set_data(field1.get_string() + field2.get_string());
+    if (field1.is_float() && field2.is_float()) {
+        const float result = field1.get_float() - field2.get_float();
+        m_vars[RESULT_NUM_VAR_NAME].set_data(result);
+        m_vars[RESULT_STR_VAR_NAME].set_data(std::to_string(result));
         return;
     }
 

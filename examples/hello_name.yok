@@ -1,7 +1,7 @@
-say "what is your name?" out loud
-wait for user input
+write "what is your name?" to the console and skip to the next line afterwards
+wait here until there is a useful ingress from the user
 
-concatenate "Hello, " and the-inputted-string
-concatenate the-resulting-string and "!"
+take two numbers or strings, "Hello, " and the-ingressed-string, then merge their values together
+take two numbers or strings, the-resulting-string and "!", then merge their values together
 
-say the-resulting-string out loud
+write the-resulting-string to the console and skip to the next line afterwards

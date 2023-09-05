@@ -5,19 +5,19 @@
 #include "field.hpp"
 
 enum class InstrType {
-    WAYPOINT,
-    TP,
-    TP_BUT_RETURN,
-    TP_BELOW,
-    TP_ABOVE,
+    LABEL,
+    GO,
+    CALL,
+    GO_DOWN,
+    GO_UP,
     RETURN,
 
-    CREATE_VAR,
-    ASSIGN_VAR,
+    VAR_DECL,
+    VAR_ASSIGN,
 
     INPUT,
-    SAY,
-    WHISPER,
+    WRITE_LN,
+    WRITE,
 
     UNLESS_SKIP,
     IF_SKIP,
@@ -26,7 +26,6 @@ enum class InstrType {
     MULTIPLY,
     ADD,
     SUBTRACT,
-    CONCAT,
 };
 
 enum class ArgType {
