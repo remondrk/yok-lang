@@ -5,8 +5,10 @@ Yok is an esoteric programming language that takes a list of instructions writte
 This implementation is a prototype for a similar and more flexible language rather than a finished project. Error handling and execution pipeline can be improved and the code is not optimal.
 
 ## Instructions
-- `value` is string, float or variable id.
-- `id` starts with a letter but can include `-` and `'`.
+- `float` is a decimal number, comma as decimal seperator: `42,1907`, `1923`
+- `string` is started and ended with `"`: `"this is a string"`
+- `value` is string, float or variable id: `6`, `"foo"`, `bar`
+- `id` starts with a letter but can include `-` and `'`: `str's-len`
 
 > Create a variable. Can't be executed twice even on the same line
 ```
