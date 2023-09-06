@@ -22,7 +22,6 @@ Match::Match(std::string value) {
 Parser::Parser(std::vector<TokenLine> &p_tokenlines)
     : m_tokenlines(p_tokenlines) {}
 
-#define M Match
 std::vector<Instr> Parser::get_instrs() {
     for (size_t i = 0; i < m_tokenlines.size(); i++) {
         m_curr_tokenline = &m_tokenlines[i];
@@ -55,7 +54,6 @@ std::vector<Instr> Parser::get_instrs() {
 
     return m_instrs;
 }
-#undef M
 
 void Parser::try_parse_instr(const std::vector<Match> &p_pattern, InstrType type) {
     if (p_pattern.size() != m_curr_tokenline->tokens.size())
