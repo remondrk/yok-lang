@@ -84,15 +84,15 @@ wait here until there is a useful ingress from the user
 ```
 &nbsp;
 
-> Write line and put a new line at the end.
+> Write to console and put a new line at the end.
 ```
 write {value} to the console and skip to the next line afterwards
 ```
 &nbsp;
 
-> Write line without a new line at the end.
+> Write to console without a new line at the end.
 ```
-instruction
+write {value} to the console , but do not skip to the next line
 ```
 &nbsp;
 
